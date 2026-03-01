@@ -1,4 +1,4 @@
-#include "UAssetDefinition_Glyph.h"
+#include "CustomAsset/UAssetDefinition_Glyph.h"
 #include "Glyph.h"
 
 FText UUAssetDefinition_Glyph::GetAssetDisplayName() const
