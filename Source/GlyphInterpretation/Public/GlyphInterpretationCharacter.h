@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include <GlyphDrawingComponent.h>
 #include "GlyphInterpretationCharacter.generated.h"
 
 class USpringArmComponent;
@@ -44,9 +45,18 @@ class AGlyphInterpretationCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	/** Draw Glyph Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DrawGlyphAction;
+
 public:
 	AGlyphInterpretationCharacter();
+
+	void BeginPlay() override;
 	
+	/* Glyph Part */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Glyph")
+	UGlyphDrawingComponent* GlyphDrawingComponent;
 
 protected:
 
@@ -55,13 +65,24 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
+
+	/** Called when draw input is started */
+	void DrawStarted(const FInputActionValue& Value);
+
+	/** Called when draw input is ongoing */
+	void DrawOngoing(const FInputActionValue& Value);
+
+	/** Called when draw input is completed */
+	void DrawCompleted(const FInputActionValue& Value);		
 
 protected:
 
 	virtual void NotifyControllerChanged() override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+private:
+	FVector2D ScreenToNormalizedPosition(FVector2D ScreenPosition) const;
 
 public:
 	/** Returns CameraBoom subobject **/

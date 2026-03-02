@@ -8,6 +8,17 @@ public class GlyphInterpretation : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AssetDefinition", "UnrealEd" });
+		PublicDependencyModuleNames.AddRange(new string[] { 
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
+			"EnhancedInput",
+			"AssetDefinition",
+			"UnrealEd",
+			"UMG",
+            "Slate",
+            "SlateCore"
+		});
 	}
 }

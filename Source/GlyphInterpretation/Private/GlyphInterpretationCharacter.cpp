@@ -10,6 +10,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Kismet/GameplayStatics.h"
+#include "GlyphDrawingWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -52,6 +54,16 @@ AGlyphInterpretationCharacter::AGlyphInterpretationCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	// Glyph Drawing Component
+	GlyphDrawingComponent = CreateDefaultSubobject<UGlyphDrawingComponent>(TEXT("GlyphDrawingComponent"));
+}
+
+void AGlyphInterpretationCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// TODO
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -85,6 +97,13 @@ void AGlyphInterpretationCharacter::SetupPlayerInputComponent(UInputComponent* P
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGlyphInterpretationCharacter::Look);
+
+		// Glyphs
+		if (DrawGlyphAction) {
+			EnhancedInputComponent->BindAction(DrawGlyphAction, ETriggerEvent::Started, this, &AGlyphInterpretationCharacter::DrawStarted);
+			EnhancedInputComponent->BindAction(DrawGlyphAction, ETriggerEvent::Triggered, this, &AGlyphInterpretationCharacter::DrawOngoing);
+			EnhancedInputComponent->BindAction(DrawGlyphAction, ETriggerEvent::Completed, this, &AGlyphInterpretationCharacter::DrawCompleted);
+		}
 	}
 	else
 	{
@@ -126,4 +145,73 @@ void AGlyphInterpretationCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+// Glyph
+// TODO : see for merge the start and update method ?
+
+void AGlyphInterpretationCharacter::DrawStarted(const FInputActionValue& Value)
+{
+	if (GlyphDrawingComponent) {
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+		if (PlayerController) {
+			float MouseX, MouseY;
+
+			PlayerController->GetMousePosition(MouseX, MouseY);
+			FVector2D NormalizedPosition = ScreenToNormalizedPosition(FVector2D(MouseX, MouseY));
+
+
+			GlyphDrawingComponent->StartDrawing(NormalizedPosition);
+		}
+	}
+}
+
+void AGlyphInterpretationCharacter::DrawOngoing(const FInputActionValue& Value)
+{
+	if (GlyphDrawingComponent && GlyphDrawingComponent->bIsDrawing) {
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+		if (PlayerController) {
+			float MouseX, MouseY;
+
+			PlayerController->GetMousePosition(MouseX, MouseY);
+			FVector2D NormalizedPosition = ScreenToNormalizedPosition(FVector2D(MouseX, MouseY));
+
+			GlyphDrawingComponent->UpdateDrawing(NormalizedPosition);
+		}
+	}
+}
+
+void AGlyphInterpretationCharacter::DrawCompleted(const FInputActionValue& Value)
+{
+	if (GlyphDrawingComponent) {
+		GlyphDrawingComponent->EndDrawing();
+	}
+}
+
+FVector2D AGlyphInterpretationCharacter::ScreenToNormalizedPosition(FVector2D ScreenPosition) const
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+	if (PlayerController) {
+		int32 ViewportSizeX, ViewportSizeY;
+
+		PlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
+
+		if (GlyphDrawingComponent) {
+			float ClampedX = FMath::Clamp(ScreenPosition.X, 0.0f, (float)ViewportSizeX);
+			float ClampedY = FMath::Clamp(ScreenPosition.Y, 0.0f, (float)ViewportSizeY);
+
+			float NormalizedX = (ClampedX / ViewportSizeX) * GlyphDrawingComponent->RenderTargetSize;
+			float NormalizedY = (ClampedY / ViewportSizeY) * GlyphDrawingComponent->RenderTargetSize;
+
+			NormalizedX = FMath::Clamp(NormalizedX, 0.0f, (float)GlyphDrawingComponent->RenderTargetSize);
+			NormalizedY = FMath::Clamp(NormalizedY, 0.0f, (float)GlyphDrawingComponent->RenderTargetSize);
+
+			return FVector2D(NormalizedX, NormalizedY);
+		}
+	}
+
+	return FVector2D::ZeroVector;
 }
