@@ -63,7 +63,9 @@ void AGlyphInterpretationCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// TODO
+	if (GlyphDrawingComponent) {
+		GlyphDrawingComponent->OnDrawingComplete.AddDynamic(this, &AGlyphInterpretationCharacter::OnGlyphDrawn);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -187,6 +189,57 @@ void AGlyphInterpretationCharacter::DrawCompleted(const FInputActionValue& Value
 {
 	if (GlyphDrawingComponent) {
 		GlyphDrawingComponent->EndDrawing();
+	}
+}
+
+void AGlyphInterpretationCharacter::OnGlyphDrawn(const TArray<FVector2D>& DrawnPoints)
+{
+	if (GlyphLibrary.Num() == 0) {
+		UE_LOG(LogTemplateCharacter, Warning, TEXT("No glyphs in library to recognize against"));
+
+		return;
+	}
+
+	FGlyphMatchResult Result = UGlyphRecognizer::RecognizeGlyph(DrawnPoints, GlyphLibrary);
+
+	if (Result.IsMatch && Result.MatchedGlyph) {
+		UE_LOG(LogTemplateCharacter, Warning, TEXT("Recognized: '%s' (Score: %.3f)"),
+			*Result.MatchedGlyph->GlyphName, Result.Score);
+
+		SpawnGlyphActor(Result.MatchedGlyph);
+	} else {
+		UE_LOG(LogTemplateCharacter, Warning, TEXT("No match found (Best score: %.3f)"), Result.Score);
+	}
+}
+
+void AGlyphInterpretationCharacter::SpawnGlyphActor(UGlyph* MatchedGlyph)
+{
+	if (!MatchedGlyph || !MatchedGlyph->ActorToSpawn) {
+		UE_LOG(LogTemplateCharacter, Warning, TEXT("No actor configured for glyph '%s'"),
+			*MatchedGlyph->GlyphName);
+
+		return;
+	}
+
+	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.0f + MatchedGlyph->SpawnOffset;
+	//FRotator SpawnRotation = GetActorRotation() + MatchedGlyph->SpawnRotation; TODO Custom rotation
+	FRotator SpawnRotation = GetActorRotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(
+		MatchedGlyph->ActorToSpawn,
+		SpawnLocation,
+		SpawnRotation,
+		SpawnParams
+	);
+
+	if (SpawnedActor) {
+		//SpawnedActor->SetActorScale3D(MatchedGlyph->SpawnScale); TODO Custom scale
+
+		UE_LOG(LogTemplateCharacter, Warning, TEXT("Spawned actor '%s' for glyph '%s'"),
+			*SpawnedActor->GetName(), *MatchedGlyph->GlyphName);
 	}
 }
 

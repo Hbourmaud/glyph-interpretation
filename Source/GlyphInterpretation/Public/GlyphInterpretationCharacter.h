@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "GlyphRecognizer.h"
 #include <GlyphDrawingComponent.h>
 #include "GlyphInterpretationCharacter.generated.h"
 
@@ -58,6 +59,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Glyph")
 	UGlyphDrawingComponent* GlyphDrawingComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Glyph Recognition")
+	TArray<UGlyph*> GlyphLibrary;
+
+	UFUNCTION()
+	void OnGlyphDrawn(const TArray<FVector2D>& DrawnPoints);
+
 protected:
 
 	/** Called for movement input */
@@ -73,7 +80,9 @@ protected:
 	void DrawOngoing(const FInputActionValue& Value);
 
 	/** Called when draw input is completed */
-	void DrawCompleted(const FInputActionValue& Value);		
+	void DrawCompleted(const FInputActionValue& Value);
+
+	void SpawnGlyphActor(UGlyph* MatchedGlyph);
 
 protected:
 

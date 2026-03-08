@@ -24,7 +24,7 @@ class GLYPHINTERPRETATION_API UGlyph : public UObject
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Glyph", meta = (ClampMin = "16", ClampMax = "128"))
 		int32 NumResamplePoints = 32;
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Glyph", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Glyph", meta = (ClampMin = "0.0", ClampMax = "10.0"))
 		float RecognitionThreshold = 0.3f;
 
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Glyph Spawn")
