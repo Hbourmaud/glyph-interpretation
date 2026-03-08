@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "GlyphRecognizer.h"
+#include <GlyphDrawingWidget.h>
 #include <GlyphDrawingComponent.h>
 #include "GlyphInterpretationCharacter.generated.h"
 
@@ -58,6 +59,9 @@ public:
 	/* Glyph Part */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Glyph")
 	UGlyphDrawingComponent* GlyphDrawingComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Glyph")
+	TSubclassOf<UGlyphDrawingWidget> DrawingWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Glyph Recognition")
 	TArray<UGlyph*> GlyphLibrary;

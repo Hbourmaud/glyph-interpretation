@@ -66,6 +66,19 @@ void AGlyphInterpretationCharacter::BeginPlay()
 	if (GlyphDrawingComponent) {
 		GlyphDrawingComponent->OnDrawingComplete.AddDynamic(this, &AGlyphInterpretationCharacter::OnGlyphDrawn);
 	}
+
+	if (DrawingWidgetClass)	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+		if (PlayerController) {
+			UGlyphDrawingWidget* DrawingWidget = CreateWidget<UGlyphDrawingWidget>(PlayerController, DrawingWidgetClass);
+
+			if (DrawingWidget) {
+				DrawingWidget->InitializeWidget(GlyphDrawingComponent);
+				DrawingWidget->AddToViewport(100);
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

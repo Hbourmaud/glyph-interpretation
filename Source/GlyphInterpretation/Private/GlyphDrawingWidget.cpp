@@ -11,9 +11,26 @@
 void UGlyphDrawingWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	if (DrawingCanvas) {
+		DrawingCanvas->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UGlyphDrawingWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	UpdateRenderTarget();
 }
 
 void UGlyphDrawingWidget::InitializeWidget(UGlyphDrawingComponent* InDrawingComponent)
 {
 	DrawingComponent = InDrawingComponent;
+}
+
+void UGlyphDrawingWidget::UpdateRenderTarget()
+{
+	if (DrawingComponent && DrawingComponent->RenderTarget && DrawingCanvas) {
+		DrawingCanvas->SetBrushResourceObject(DrawingComponent->RenderTarget);
+	}
 }
