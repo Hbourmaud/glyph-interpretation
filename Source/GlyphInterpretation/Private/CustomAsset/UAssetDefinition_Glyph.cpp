@@ -1,4 +1,5 @@
 #include "CustomAsset/UAssetDefinition_Glyph.h"
+#include "CustomAsset/GlyphAssetEditor.h"
 #include "Glyph.h"
 
 FText UUAssetDefinition_Glyph::GetAssetDisplayName() const
@@ -23,4 +24,15 @@ TConstArrayView<FAssetCategoryPath> UUAssetDefinition_Glyph::GetAssetCategories(
 	};
 
 	return Categories;
+}
+
+EAssetCommandResult UUAssetDefinition_Glyph::OpenAssets(const FAssetOpenArgs& OpenArgs) const
+{
+	for (UGlyph* Glyph : OpenArgs.LoadObjects<UGlyph>()) {
+		TSharedRef<FGlyphAssetEditor> NewEditor = MakeShared<FGlyphAssetEditor>();
+
+		NewEditor->InitGlyphEditor(OpenArgs.GetToolkitMode(), OpenArgs.ToolkitHost, Glyph);
+	}
+
+	return EAssetCommandResult::Handled;
 }

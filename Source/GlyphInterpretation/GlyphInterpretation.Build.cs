@@ -18,7 +18,9 @@ public class GlyphInterpretation : ModuleRules
 			"UnrealEd",
 			"UMG",
             "Slate",
-            "SlateCore"
-		});
+            "SlateCore",
+            "PropertyEditor",
+			"EditorStyle"
+        });
 	}
 }
