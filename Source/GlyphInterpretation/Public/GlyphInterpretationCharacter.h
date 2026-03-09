@@ -51,6 +51,9 @@ class AGlyphInterpretationCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DrawGlyphAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleDrawingAction;
+
 public:
 	AGlyphInterpretationCharacter();
 
@@ -88,6 +91,12 @@ protected:
 
 	void SpawnGlyphActor(UGlyph* MatchedGlyph);
 
+	void ToggleDrawingMode();
+
+	void ShowDrawingWidget();
+
+	void HideDrawingWidget();
+
 protected:
 
 	virtual void NotifyControllerChanged() override;
@@ -95,7 +104,12 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	UPROPERTY()
+	UGlyphDrawingWidget* DrawingWidget;
+
 	FVector2D ScreenToNormalizedPosition(FVector2D ScreenPosition) const;
+
+	bool IsDrawingModeActive = false;
 
 public:
 	/** Returns CameraBoom subobject **/

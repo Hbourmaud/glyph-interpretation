@@ -34,7 +34,7 @@ public:
 	int32 RenderTargetSize = 512;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Glyph Drawing")
-	bool bIsDrawing = false;
+	bool IsDrawing = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Glyph Drawing")
 	TArray<FVector2D> CurrentDrawnPoints;

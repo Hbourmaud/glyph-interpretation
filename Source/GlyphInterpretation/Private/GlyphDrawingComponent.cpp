@@ -41,7 +41,7 @@ void UGlyphDrawingComponent::StartDrawing(FVector2D StartPoint)
 
 	ClearDrawing();
 
-	bIsDrawing = true;
+	IsDrawing = true;
 	CurrentDrawnPoints.Empty();
 	CurrentDrawnPoints.Add(StartPoint);
 	LastPoint = StartPoint;
@@ -49,7 +49,7 @@ void UGlyphDrawingComponent::StartDrawing(FVector2D StartPoint)
 
 void UGlyphDrawingComponent::UpdateDrawing(FVector2D CurrentPoint)
 {
-	if (!bIsDrawing || !RenderTarget) {
+	if (!IsDrawing || !RenderTarget) {
 		return;
 	}
 
@@ -60,15 +60,17 @@ void UGlyphDrawingComponent::UpdateDrawing(FVector2D CurrentPoint)
 
 void UGlyphDrawingComponent::EndDrawing()
 {
-	if (!bIsDrawing) {
+	if (!IsDrawing) {
 		return;
 	}
 
-	bIsDrawing = false;
+	IsDrawing = false;
 
 	OnDrawingComplete.Broadcast(CurrentDrawnPoints);
 
-	SaveRenderTargetToFile(TEXT("GlyphDrawing.png")); // TEMP
+	SaveRenderTargetToFile(TEXT("GlyphDrawing.png")); // TODO debug
+	
+	ClearDrawing();
 }
 
 void UGlyphDrawingComponent::ClearDrawing()
@@ -79,7 +81,7 @@ void UGlyphDrawingComponent::ClearDrawing()
 
 	UKismetRenderingLibrary::ClearRenderTarget2D(GetWorld(), RenderTarget, FLinearColor::Black);
 	CurrentDrawnPoints.Empty();
-	bIsDrawing = false;
+	IsDrawing = false;
 }
 
 void UGlyphDrawingComponent::DrawLineOnRenderTarget(FVector2D From, FVector2D To)

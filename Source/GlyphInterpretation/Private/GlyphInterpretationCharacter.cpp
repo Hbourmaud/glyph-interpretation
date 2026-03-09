@@ -71,11 +71,12 @@ void AGlyphInterpretationCharacter::BeginPlay()
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
 		if (PlayerController) {
-			UGlyphDrawingWidget* DrawingWidget = CreateWidget<UGlyphDrawingWidget>(PlayerController, DrawingWidgetClass);
+			DrawingWidget = CreateWidget<UGlyphDrawingWidget>(PlayerController, DrawingWidgetClass);
 
 			if (DrawingWidget) {
 				DrawingWidget->InitializeWidget(GlyphDrawingComponent);
 				DrawingWidget->AddToViewport(100);
+				DrawingWidget->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
 	}
@@ -118,6 +119,10 @@ void AGlyphInterpretationCharacter::SetupPlayerInputComponent(UInputComponent* P
 			EnhancedInputComponent->BindAction(DrawGlyphAction, ETriggerEvent::Started, this, &AGlyphInterpretationCharacter::DrawStarted);
 			EnhancedInputComponent->BindAction(DrawGlyphAction, ETriggerEvent::Triggered, this, &AGlyphInterpretationCharacter::DrawOngoing);
 			EnhancedInputComponent->BindAction(DrawGlyphAction, ETriggerEvent::Completed, this, &AGlyphInterpretationCharacter::DrawCompleted);
+		}
+
+		if (ToggleDrawingAction) {
+			EnhancedInputComponent->BindAction(ToggleDrawingAction, ETriggerEvent::Started, this, &AGlyphInterpretationCharacter::ToggleDrawingMode);
 		}
 	}
 	else
@@ -167,42 +172,47 @@ void AGlyphInterpretationCharacter::Look(const FInputActionValue& Value)
 
 void AGlyphInterpretationCharacter::DrawStarted(const FInputActionValue& Value)
 {
-	if (GlyphDrawingComponent) {
-		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!IsDrawingModeActive || !GlyphDrawingComponent) {
+		return;
+	}
 
-		if (PlayerController) {
-			float MouseX, MouseY;
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
-			PlayerController->GetMousePosition(MouseX, MouseY);
-			FVector2D NormalizedPosition = ScreenToNormalizedPosition(FVector2D(MouseX, MouseY));
+	if (PlayerController) {
+		float MouseX, MouseY;
 
+		PlayerController->GetMousePosition(MouseX, MouseY);
+		FVector2D NormalizedPosition = ScreenToNormalizedPosition(FVector2D(MouseX, MouseY));
 
-			GlyphDrawingComponent->StartDrawing(NormalizedPosition);
-		}
+		GlyphDrawingComponent->StartDrawing(NormalizedPosition);
 	}
 }
 
 void AGlyphInterpretationCharacter::DrawOngoing(const FInputActionValue& Value)
 {
-	if (GlyphDrawingComponent && GlyphDrawingComponent->bIsDrawing) {
-		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!IsDrawingModeActive || !GlyphDrawingComponent || !GlyphDrawingComponent->IsDrawing) {
+		return;
+	}
 
-		if (PlayerController) {
-			float MouseX, MouseY;
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
-			PlayerController->GetMousePosition(MouseX, MouseY);
-			FVector2D NormalizedPosition = ScreenToNormalizedPosition(FVector2D(MouseX, MouseY));
+	if (PlayerController) {
+		float MouseX, MouseY;
 
-			GlyphDrawingComponent->UpdateDrawing(NormalizedPosition);
-		}
+		PlayerController->GetMousePosition(MouseX, MouseY);
+		FVector2D NormalizedPosition = ScreenToNormalizedPosition(FVector2D(MouseX, MouseY));
+
+		GlyphDrawingComponent->UpdateDrawing(NormalizedPosition);
 	}
 }
 
 void AGlyphInterpretationCharacter::DrawCompleted(const FInputActionValue& Value)
 {
-	if (GlyphDrawingComponent) {
-		GlyphDrawingComponent->EndDrawing();
+	if (!IsDrawingModeActive || !GlyphDrawingComponent) {
+		return;
 	}
+
+	GlyphDrawingComponent->EndDrawing();
 }
 
 void AGlyphInterpretationCharacter::OnGlyphDrawn(const TArray<FVector2D>& DrawnPoints)
@@ -220,6 +230,8 @@ void AGlyphInterpretationCharacter::OnGlyphDrawn(const TArray<FVector2D>& DrawnP
 			*Result.MatchedGlyph->GlyphName, Result.Score);
 
 		SpawnGlyphActor(Result.MatchedGlyph);
+
+		HideDrawingWidget();
 	} else {
 		UE_LOG(LogTemplateCharacter, Warning, TEXT("No match found (Best score: %.3f)"), Result.Score);
 	}
@@ -253,6 +265,37 @@ void AGlyphInterpretationCharacter::SpawnGlyphActor(UGlyph* MatchedGlyph)
 
 		UE_LOG(LogTemplateCharacter, Warning, TEXT("Spawned actor '%s' for glyph '%s'"),
 			*SpawnedActor->GetName(), *MatchedGlyph->GlyphName);
+	}
+}
+
+void AGlyphInterpretationCharacter::ToggleDrawingMode()
+{
+	IsDrawingModeActive = !IsDrawingModeActive;
+
+	if (IsDrawingModeActive) {
+		ShowDrawingWidget();
+	} else {
+		HideDrawingWidget();
+	}
+}
+
+void AGlyphInterpretationCharacter::ShowDrawingWidget()
+{
+	if (DrawingWidget) {
+		DrawingWidget->SetVisibility(ESlateVisibility::Visible);
+		IsDrawingModeActive = true;
+	}
+}
+
+void AGlyphInterpretationCharacter::HideDrawingWidget()
+{
+	if (DrawingWidget) {
+		DrawingWidget->SetVisibility(ESlateVisibility::Hidden);
+		IsDrawingModeActive = false;
+
+		if (GlyphDrawingComponent && GlyphDrawingComponent->IsDrawing)	{
+			GlyphDrawingComponent->EndDrawing();
+		}
 	}
 }
 
