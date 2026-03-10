@@ -6,7 +6,6 @@
 #include "Engine/Canvas.h"
 #include "GlyphDrawingComponent.generated.h"
 
-// TODO : avoid making this ?
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDrawingComplete, const TArray<FVector2D>&, DrawnPoints);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -42,6 +41,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Glyph Drawing")
 	FOnDrawingComplete OnDrawingComplete;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Glyph Drawing", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float BackgroundOpacity = 0.3f;
+
 	UFUNCTION(BlueprintCallable, Category = "Glyph Drawing")
 	void StartDrawing(FVector2D StartPoint);
 
@@ -57,8 +59,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Glyph Drawing")
 	void InitializeRenderTarget();
 
+	/* ONLY FOR DEBUG */
 	UFUNCTION(BlueprintCallable, Category = "Glyph Drawing")
-	void SaveRenderTargetToFile(FString Filename = TEXT("GlyphDrawing")); // TEMP
+	void SaveRenderTargetToFile(FString Filename = TEXT("GlyphDrawing"));
 
 private:
 	FVector2D LastPoint;

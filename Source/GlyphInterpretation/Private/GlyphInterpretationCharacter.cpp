@@ -133,6 +133,10 @@ void AGlyphInterpretationCharacter::SetupPlayerInputComponent(UInputComponent* P
 
 void AGlyphInterpretationCharacter::Move(const FInputActionValue& Value)
 {
+	if (IsDrawingModeActive) {
+		return;
+	}
+
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -156,6 +160,10 @@ void AGlyphInterpretationCharacter::Move(const FInputActionValue& Value)
 
 void AGlyphInterpretationCharacter::Look(const FInputActionValue& Value)
 {
+	if (IsDrawingModeActive) {
+		return;
+	}
+
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
@@ -166,9 +174,6 @@ void AGlyphInterpretationCharacter::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
-
-// Glyph
-// TODO : see for merge the start and update method ?
 
 void AGlyphInterpretationCharacter::DrawStarted(const FInputActionValue& Value)
 {
@@ -220,6 +225,10 @@ void AGlyphInterpretationCharacter::OnGlyphDrawn(const TArray<FVector2D>& DrawnP
 	if (GlyphLibrary.Num() == 0) {
 		UE_LOG(LogTemplateCharacter, Warning, TEXT("No glyphs in library to recognize against"));
 
+		if (GlyphDrawingComponent) {
+			GlyphDrawingComponent->ClearDrawing();
+		}
+
 		return;
 	}
 
@@ -235,6 +244,10 @@ void AGlyphInterpretationCharacter::OnGlyphDrawn(const TArray<FVector2D>& DrawnP
 	} else {
 		UE_LOG(LogTemplateCharacter, Warning, TEXT("No match found (Best score: %.3f)"), Result.Score);
 	}
+
+	if (GlyphDrawingComponent) {
+		GlyphDrawingComponent->ClearDrawing();
+	}
 }
 
 void AGlyphInterpretationCharacter::SpawnGlyphActor(UGlyph* MatchedGlyph)
@@ -247,7 +260,6 @@ void AGlyphInterpretationCharacter::SpawnGlyphActor(UGlyph* MatchedGlyph)
 	}
 
 	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.0f + MatchedGlyph->SpawnOffset;
-	//FRotator SpawnRotation = GetActorRotation() + MatchedGlyph->SpawnRotation; TODO Custom rotation
 	FRotator SpawnRotation = GetActorRotation();
 
 	FActorSpawnParameters SpawnParams;
@@ -259,13 +271,6 @@ void AGlyphInterpretationCharacter::SpawnGlyphActor(UGlyph* MatchedGlyph)
 		SpawnRotation,
 		SpawnParams
 	);
-
-	if (SpawnedActor) {
-		//SpawnedActor->SetActorScale3D(MatchedGlyph->SpawnScale); TODO Custom scale
-
-		UE_LOG(LogTemplateCharacter, Warning, TEXT("Spawned actor '%s' for glyph '%s'"),
-			*SpawnedActor->GetName(), *MatchedGlyph->GlyphName);
-	}
 }
 
 void AGlyphInterpretationCharacter::ToggleDrawingMode()
@@ -284,6 +289,20 @@ void AGlyphInterpretationCharacter::ShowDrawingWidget()
 	if (DrawingWidget) {
 		DrawingWidget->SetVisibility(ESlateVisibility::Visible);
 		IsDrawingModeActive = true;
+
+		if (GlyphDrawingComponent) {
+			GlyphDrawingComponent->ClearDrawing();
+		}
+
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+		if (PlayerController) {
+			PlayerController->bShowMouseCursor = true;
+		}
+
+		if (GetCharacterMovement()) {
+			GetCharacterMovement()->DisableMovement();
+		}
 	}
 }
 
@@ -292,6 +311,21 @@ void AGlyphInterpretationCharacter::HideDrawingWidget()
 	if (DrawingWidget) {
 		DrawingWidget->SetVisibility(ESlateVisibility::Hidden);
 		IsDrawingModeActive = false;
+
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+		if (PlayerController) {
+			PlayerController->bShowMouseCursor = false;
+
+			FInputModeGameOnly InputMode;
+
+			InputMode.SetConsumeCaptureMouseDown(false);
+			PlayerController->SetInputMode(InputMode);
+		}
+
+		if (GetCharacterMovement()) {
+			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		}
 
 		if (GlyphDrawingComponent && GlyphDrawingComponent->IsDrawing)	{
 			GlyphDrawingComponent->EndDrawing();

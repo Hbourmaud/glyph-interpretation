@@ -13,7 +13,7 @@ void SGlyphDrawingPanel::Construct(const FArguments& InArgs, UGlyph* InGlyph)
 {
     Glyph = InGlyph;
     IsDrawing = false;
-    CanvasSize = FVector2D(512.0f, 512.0f); // TODO mmmh
+    CanvasSize = FVector2D(512.0f, 512.0f);
 
     ChildSlot
         [
@@ -107,7 +107,7 @@ int32 SGlyphDrawingPanel::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 
 FReply SGlyphDrawingPanel::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-    if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton) { // TODO better way to check keys ?
+    if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton) {
         IsDrawing = true;
         DrawnPoints.Empty();
 

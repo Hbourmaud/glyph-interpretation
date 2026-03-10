@@ -109,18 +109,24 @@ FGlyphMatchResult UGlyphRecognizer::RecognizeGlyph(const TArray<FVector2D>& Draw
 
 	if (DrawnPoints.Num() < 2 || GlyphLibrary.Num() == 0) {
 		UE_LOG(LogTemp, Warning, TEXT("RecognizeGlyph: Invalid input (DrawnPoints=%d, Library=%d)"), DrawnPoints.Num(), GlyphLibrary.Num());
+
 		return Result;
 	}
 
-	TArray<FVector2D> ProcessedPoints = DrawnPoints;
-	int32 NumResamplePoints = GlyphLibrary[0]->NumResamplePoints;
-
-	ProcessedPoints = Resample(ProcessedPoints, NumResamplePoints);
-	ProcessedPoints = ScaleToUnitSquare(ProcessedPoints);
-	ProcessedPoints = TranslateToOrigin(ProcessedPoints);
-
 	for (UGlyph* Glyph : GlyphLibrary) {
 		if (!Glyph || Glyph->ModelPoints.Num() == 0) {
+			continue;
+		}
+
+		TArray<FVector2D> ProcessedPoints = DrawnPoints;
+		ProcessedPoints = Resample(ProcessedPoints, Glyph->NumResamplePoints);
+		ProcessedPoints = ScaleToUnitSquare(ProcessedPoints);
+		ProcessedPoints = TranslateToOrigin(ProcessedPoints);
+
+		if (ProcessedPoints.Num() != Glyph->ModelPoints.Num()) {
+			UE_LOG(LogTemp, Warning, TEXT("Glyph '%s': Point count mismatch (Drawn: %d vs Model: %d)"),
+				*Glyph->GlyphName, ProcessedPoints.Num(), Glyph->ModelPoints.Num());
+
 			continue;
 		}
 

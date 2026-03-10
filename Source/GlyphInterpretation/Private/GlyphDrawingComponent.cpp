@@ -68,20 +68,21 @@ void UGlyphDrawingComponent::EndDrawing()
 
 	OnDrawingComplete.Broadcast(CurrentDrawnPoints);
 
-	SaveRenderTargetToFile(TEXT("GlyphDrawing.png")); // TODO debug
-	
-	ClearDrawing();
+	// SaveRenderTargetToFile(TEXT("GlyphDrawing.png")); // DEBUG
 }
 
 void UGlyphDrawingComponent::ClearDrawing()
 {
 	if (!RenderTarget) {
 		return;
-	}		
+	}
 
-	UKismetRenderingLibrary::ClearRenderTarget2D(GetWorld(), RenderTarget, FLinearColor::Black);
+	FLinearColor TranslucentBlack(0.0f, 0.0f, 0.0f, BackgroundOpacity);
+
+	UKismetRenderingLibrary::ClearRenderTarget2D(GetWorld(), RenderTarget, TranslucentBlack);
 	CurrentDrawnPoints.Empty();
 	IsDrawing = false;
+	LastPoint = FVector2D::ZeroVector;
 }
 
 void UGlyphDrawingComponent::DrawLineOnRenderTarget(FVector2D From, FVector2D To)
@@ -106,7 +107,7 @@ void UGlyphDrawingComponent::DrawLineOnRenderTarget(FVector2D From, FVector2D To
 	UKismetRenderingLibrary::EndDrawCanvasToRenderTarget(GetWorld(), Context);
 }
 
-// TEMP
+// ONLY FOR DEBUG
 void UGlyphDrawingComponent::SaveRenderTargetToFile(FString Filename)
 {
 	if (!RenderTarget)
