@@ -119,7 +119,8 @@ void UGlyphDrawingComponent::SaveRenderTargetToFile(FString Filename)
 	FString ProjectDir = FPaths::ProjectDir();
 	FString SavePath = ProjectDir + TEXT("Saved/Screenshots/") + Filename + TEXT(".png");
 
-	FArchive* Ar = IFileManager::Get().CreateFileWriter(*SavePath);
+	TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileWriter(*SavePath));
+
 	if (Ar)
 	{
 		FBufferArchive Buffer;
@@ -130,7 +131,5 @@ void UGlyphDrawingComponent::SaveRenderTargetToFile(FString Filename)
 			Ar->Serialize(const_cast<uint8*>(Buffer.GetData()), Buffer.Num());
 			UE_LOG(LogTemp, Warning, TEXT("Render target saved to: %s"), *SavePath);
 		}
-
-		delete Ar;
 	}
 }

@@ -1,3 +1,5 @@
+#if WITH_EDITOR
+
 #include "CustomAsset/GlyphAssetEditor.h"
 #include "CustomAsset/GlyphDrawingPanel.h"
 #include "Glyph.h"
@@ -123,3 +125,5 @@ FLinearColor FGlyphAssetEditor::GetWorldCentricTabColorScale() const
 }
 
 #undef LOCTEXT_NAMESPACE
+
+#endif // WITH_EDITOR

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#if WITH_EDITOR
+
 #include "AssetDefinitionDefault.h"
 #include "UAssetDefinition_Glyph.generated.h"
 
@@ -16,3 +19,5 @@ class GLYPHINTERPRETATION_API UUAssetDefinition_Glyph : public UAssetDefinitionD
 		virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const override;
 		virtual EAssetCommandResult OpenAssets(const FAssetOpenArgs& OpenArgs) const override;
 };
+
+#endif // WITH_EDITOR

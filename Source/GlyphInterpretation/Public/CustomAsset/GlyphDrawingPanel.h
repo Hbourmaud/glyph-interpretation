@@ -1,6 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#if WITH_EDITOR
+
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 
@@ -36,3 +39,5 @@ private:
 
     TArray<FVector2D> ConvertToModel() const;
 };
+
+#endif // WITH_EDITOR

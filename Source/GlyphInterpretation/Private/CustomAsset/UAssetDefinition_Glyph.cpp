@@ -1,3 +1,5 @@
+#if WITH_EDITOR
+
 #include "CustomAsset/UAssetDefinition_Glyph.h"
 #include "CustomAsset/GlyphAssetEditor.h"
 #include "Glyph.h"
@@ -36,3 +38,5 @@ EAssetCommandResult UUAssetDefinition_Glyph::OpenAssets(const FAssetOpenArgs& Op
 
 	return EAssetCommandResult::Handled;
 }
+
+#endif // WITH_EDITOR

@@ -1,3 +1,5 @@
+#if WITH_EDITOR
+
 #include "CustomAsset/GlyphDrawingPanel.h"
 #include "Glyph.h"
 #include "GlyphRecognizer.h"
@@ -188,3 +190,5 @@ TArray<FVector2D> SGlyphDrawingPanel::ConvertToModel() const
 }
 
 #undef LOCTEXT_NAMESPACE
+
+#endif // WITH_EDITOR

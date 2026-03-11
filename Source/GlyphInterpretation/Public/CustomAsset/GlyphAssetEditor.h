@@ -1,6 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#if WITH_EDITOR
+
 #include "Toolkits/AssetEditorToolkit.h"
 #include "Widgets/Docking/SDockTab.h"
 
@@ -34,3 +37,5 @@ private:
 
     TSharedPtr<SGlyphDrawingPanel> DrawingPanel;
 };
+
+#endif // WITH_EDITOR
